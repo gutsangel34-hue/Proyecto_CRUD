@@ -574,6 +574,14 @@ h3 {
   background: var(--color-accent-bg);
 }
 
+.btn-mini--peligro {
+  color: var(--color-error);
+}
+
+.btn-mini--peligro:hover {
+  background: var(--color-error-bg);
+}
+
 .ok-text {
   margin-top: 0.9rem;
   color: var(--color-success);

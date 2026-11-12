@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getCategorias, getPalabrasAdmin, guardarPalabraAdmin } from '../api'
+import { getCategorias, getPalabrasAdmin, guardarPalabraAdmin, eliminarPalabraAdmin } from '../api'
 import { useAuth } from '../AuthContext'
 
 const PALABRA_VACIA = {
@@ -59,6 +59,23 @@ function Admin() {
     setError('')
     try {
       await guardarPalabraAdmin(usuario.id_usuario, { ...palabra, validada: !palabra.validada })
+      await cargar()
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
+  async function eliminar(palabra) {
+    const ok = window.confirm(
+      `¿Eliminar "${palabra.palabra_lengua_nativa}"? También se borra de las lecciones y del progreso de los estudiantes.`
+    )
+    if (!ok) return
+    setError('')
+    setMensaje('')
+    try {
+      await eliminarPalabraAdmin(usuario.id_usuario, palabra.id_palabra)
+      if (formulario.id_palabra === palabra.id_palabra) setFormulario(PALABRA_VACIA)
+      setMensaje('Palabra eliminada.')
       await cargar()
     } catch (err) {
       setError(err.message)
@@ -163,6 +180,7 @@ function Admin() {
                   <button className="btn-mini" onClick={() => cambiarValidada(p)}>
                     {p.validada ? 'Quitar validación' : 'Validar'}
                   </button>
+                  <button className="btn-mini btn-mini--peligro" onClick={() => eliminar(p)}>Eliminar</button>
                 </td>
               </tr>
             ))}

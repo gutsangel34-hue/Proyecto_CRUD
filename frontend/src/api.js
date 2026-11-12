@@ -9,6 +9,7 @@ async function pedir(ruta, opciones = {}) {
     headers: { 'Content-Type': 'application/json', ...opciones.headers },
     body: opciones.body ? JSON.stringify(opciones.body) : undefined,
   });
+  if (res.status === 204) return null;
   const datos = await res.json().catch(() => null);
   if (!res.ok) throw new Error(datos?.error || 'No se pudo conectar con el servidor');
   return datos;
@@ -87,5 +88,12 @@ export function guardarPalabraAdmin(idAdmin, palabra) {
     method: editando ? 'PUT' : 'POST',
     headers: { 'x-id-usuario': idAdmin },
     body: palabra,
+  });
+}
+
+export function eliminarPalabraAdmin(idAdmin, idPalabra) {
+  return pedir(`/admin/palabras/${idPalabra}`, {
+    method: 'DELETE',
+    headers: { 'x-id-usuario': idAdmin },
   });
 }

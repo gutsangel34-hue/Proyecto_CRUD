@@ -255,6 +255,18 @@ app.put('/admin/palabras/:id', soloAdmin, (req, res) =>
   guardarPalabra(req, res, Number(req.params.id))
 );
 
+// Eliminar una palabra (también borra su progreso y su lugar en las lecciones)
+app.delete('/admin/palabras/:id', soloAdmin, async (req, res) => {
+  const { data, error } = await supabase.rpc('admin_eliminar_palabra', {
+    p_id_admin: req.idAdmin,
+    p_id_palabra: Number(req.params.id),
+  });
+
+  if (error) return res.status(500).json({ error: error.message });
+  if (!data) return res.status(404).json({ error: 'Palabra no encontrada' });
+  res.status(204).send();
+});
+
 // =====================================================
 // Arrancar servidor
 // =====================================================
