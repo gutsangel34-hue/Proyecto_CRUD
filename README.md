@@ -30,7 +30,7 @@ frontend/src/
 
 ## Diagrama de clases
 
-![Diagrama de clases](diagrama_clases.png)
+![Diagrama de clases](modelo_clases_/diagrama_clases.png)
 
 ## Cómo ejecutarlo
 
