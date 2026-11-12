@@ -1,48 +1,59 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { getLeccionDetalle, marcarComoDominada as marcarDominadaApi } from '../api'
+import { getLeccionDetalle, getProgreso, marcarComoDominada } from '../api'
 import { useAuth } from '../AuthContext'
+import TarjetaPalabra from '../components/TarjetaPalabra'
 
 function LeccionDetalle() {
   const { id } = useParams()
   const { usuario } = useAuth()
-  const [leccion, setLeccion] = useState(null)
+  const [titulo, setTitulo] = useState('')
   const [palabras, setPalabras] = useState([])
+  const [dominadas, setDominadas] = useState(new Set())
+  const [cargando, setCargando] = useState(true)
 
   useEffect(() => {
     async function cargarDatos() {
-      const detalle = await getLeccionDetalle(id)
-      setLeccion({ titulo: detalle.titulo })
+      const [detalle, progreso] = await Promise.all([
+        getLeccionDetalle(id),
+        getProgreso(usuario.id_usuario).catch(() => ({ palabras: [] })),
+      ])
+      setTitulo(detalle.titulo)
       setPalabras(detalle.palabras)
+      setDominadas(new Set(progreso.palabras.filter((p) => p.dominado).map((p) => p.id_palabra)))
+      setCargando(false)
     }
     cargarDatos()
-  }, [id])
+  }, [id, usuario.id_usuario])
 
-  async function marcarComoDominada(idPalabra) {
-    await marcarDominadaApi(usuario.id_usuario, idPalabra)
-    alert('¡Guardado!')
+  async function dominar(idPalabra) {
+    const ok = await marcarComoDominada(usuario.id_usuario, idPalabra)
+    if (ok) setDominadas((anteriores) => new Set(anteriores).add(idPalabra))
   }
+
+  if (cargando) return <div className="page"><p className="empty-state">Cargando lección...</p></div>
 
   return (
     <div className="page">
       <Link to="/lecciones">&larr; Volver a lecciones</Link>
-      <h1 className="page-title">{leccion?.titulo}</h1>
+      <div className="topbar">
+        <h1 className="page-title">{titulo}</h1>
+        {palabras.length >= 4 && (
+          <Link className="btn" to={`/lecciones/${id}/quiz`}>Practicar esta lección</Link>
+        )}
+      </div>
 
       {palabras.length === 0 ? (
         <p className="empty-state">Esta lección aún no tiene palabras.</p>
       ) : (
         <div className="card-grid">
           {palabras.map((p) => (
-            <div className="card word-card" key={p.id_palabra}>
-              <span className="word-card__nativa">{p.palabra_lengua_nativa}</span>
-              <span className="word-card__traduccion">{p.traduccion_espanol}</span>
-              <div className="word-card__footer">
-                <span className="badge">{p.dificultad}</span>
-                <button className="btn-dominar" onClick={() => marcarComoDominada(p.id_palabra)}>
-                  Dominado ✓
-                </button>
-              </div>
-            </div>
+            <TarjetaPalabra
+              key={p.id_palabra}
+              palabra={p}
+              dominada={dominadas.has(p.id_palabra)}
+              onDominar={dominar}
+            />
           ))}
         </div>
       )}

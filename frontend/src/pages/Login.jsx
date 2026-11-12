@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { login } from '../api'
 import { useAuth } from '../AuthContext'
 
@@ -29,7 +29,8 @@ function Login() {
     <div className="page page--auth">
       <div className="auth-card">
         <span className="auth-card__brand" aria-hidden="true" />
-        <h1>Aprende Kankuamo</h1>
+        <h1>Ecos Nativos</h1>
+        <p className="auth-card__lema">Aprende la lengua kankuama</p>
         <form onSubmit={manejarLogin}>
           <div className="field">
             <label htmlFor="correo">Correo</label>
@@ -56,6 +57,7 @@ function Login() {
           <button type="submit">Entrar</button>
         </form>
         {error && <p className="error-text">{error}</p>}
+        <p className="auth-card__pie">¿No tienes cuenta? <Link to="/registro">Crear cuenta</Link></p>
       </div>
     </div>
   )
